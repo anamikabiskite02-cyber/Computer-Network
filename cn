@@ -1,0 +1,52 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+// Function to calculate number of redundant bits required
+int getRedundantBits(int m) {
+    int r = 0;
+    while (pow(2, r) < (m + r + 1)) {
+        r++;
+    }
+    return r;
+}
+
+// Function to generate the total encoded message frame
+vector<int> generateHammingCode(string data) {
+    int m = data.length();
+    int r = getRedundantBits(m);
+    int totalLen = m + r;
+    
+    // Using 1-based indexing for ease of calculation (size = totalLen + 1)
+    vector<int> code(totalLen + 1, 0);
+    
+    // Map data bits to non-power-of-2 positions
+    int dataPtr = 0;
+    for (int i = 1; i <= totalLen; i++) {
+        if ((i & (i - 1)) == 0) {
+            code[i] = 0; // Temp placeholder for parity bits
+        } else {
+            code[i] = data[dataPtr] - '0';
+            dataPtr++;
+        }
+    }
+
+    // Compute even parity values for each parity position
+    for (int i = 0; i < r; i++) {
+        int parityPos = 1 << i; 
+        int parityValue = 0;
+        
+        for (int j = 1; j <= totalLen; j++) {
+            // Check if parity position bit covers index j
+            if ((j & parityPos) != 0) {
+                parityValue ^= code[j];
+            }
+        }
+        code[parityPos] = parityValue;
+    }
+    return code;
+} reciver.cpp
